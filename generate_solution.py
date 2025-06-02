@@ -42,7 +42,7 @@ def main(args):
         num_chunks = max(1, math.ceil(len(tok_thinking) / args.num_tokens_per_step))
         partial_thinkings = []
         for i in range(1, num_chunks):
-            chunk_size = min(i * args.max_tokens_per_think_chunk, len(tok_thinking))
+            chunk_size = min(i * args.num_tokens_per_step, len(tok_thinking))
             full_tokens = tok_thinking[:chunk_size]
             partial_thinking = tokenizer.decode(full_tokens) + "</think>"
             partial_thinkings.append(partial_thinking)
