@@ -34,7 +34,7 @@ def main(args):
     prompt_partial_thinkings = []
     for i, example in enumerate(examples):
         question = example["question"].strip()
-        prompt = prepare_prompt(question, tokenizer, args.data_name)
+        prompt = prepare_prompt(question, tokenizer)
         thinking = example["thinking"].split("</think>")[0]
         solution = example["thinking"].split("</think>")[1]
 
