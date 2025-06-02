@@ -117,7 +117,6 @@ def parse_args():
     
     # Model and sampling
     parser.add_argument("--model_name_or_path", default="gpt-4", type=str)
-    parser.add_argument("--max_tokens_per_call", default=2048, type=int)
     parser.add_argument("--pipeline_parallel_size", type=int, default=1)
     parser.add_argument('--max_model_len', type=int, default=40000)
     parser.add_argument("--max_num_seqs", type=int, default=32)
