@@ -16,7 +16,7 @@ def main(args):
     output_dir = args.output_dir
     os.makedirs(f"{output_dir}", exist_ok=True)
 
-    out_file_prefix = f"{model_name}_seed{args.seed}_t{args.temperature}topp{args.top_p}minp{args.min_p}_num{args.num_test_sample}"
+    out_file_prefix = f"{model_name}_seed{args.seed}_t{args.temperature}topp{args.top_p}minp{args.min_p}_num{args.num_test_sample}start{args.start}end{args.end}"
     out_file = f"{output_dir}/{out_file_prefix}_tokensPerStep{args.num_tokens_per_step}.json"
 
     # Load and prepare data
@@ -25,6 +25,8 @@ def main(args):
 
     if args.num_test_sample != -1:
         examples = examples[:args.num_test_sample]
+    if args.end != -1:
+        examples = examples[args.start:args.end]
 
     print("=" * 50)
     print(f"{args.data_path} || #samples: {len(examples)}")
@@ -114,6 +116,8 @@ def parse_args():
     # Data
     parser.add_argument("--data_path", default="./benchmarks", type=str)
     parser.add_argument("--num_test_sample", default=-1, type=int)  # -1 for full data
+    parser.add_argument("--start", default=0, type=int)
+    parser.add_argument("--end", default=-1, type=int)
     
     # Model and sampling
     parser.add_argument("--model_name_or_path", default="gpt-4", type=str)
