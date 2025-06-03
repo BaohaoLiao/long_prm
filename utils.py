@@ -17,9 +17,9 @@ def set_seed(seed: int = 42) -> None:
 
 
 def prepare_prompt(question, tokenizer):
-    user_prompt = "Please reason step by step, and put your final answer within \\(\\boxed{}\\).\n\n"
+    user_prompt = "Please reason step by step, and put your final answer within \\boxed{}."
     message = [
-        {"role": "user", "content": user_prompt + "Question: " + question},
+        {"role": "user", "content":"Question: " + question + "\n\n" + user_prompt},
     ]
     prompt = tokenizer.apply_chat_template(
         message,
