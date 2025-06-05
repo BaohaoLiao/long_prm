@@ -37,8 +37,8 @@ def main(args):
     for i, example in enumerate(examples):
         question = example["question"].strip()
         prompt = prepare_prompt(question, tokenizer)
-        thinking = example["thinking"].split("</think>")[0]
-        solution = example["thinking"].split("</think>")[1]
+        thinking = example["thinking"]
+        solution = example["solution"]
 
         tok_thinking = tokenizer.encode(thinking)[1:]
         num_chunks = max(1, math.ceil(len(tok_thinking) / args.num_tokens_per_step))
@@ -54,8 +54,9 @@ def main(args):
             "question": question,
             "answer": example["answer"],
             "prompt": prompt,
-            "thinkings": partial_thinkings + [thinking + "</think>"],
+            "thinkings": partial_thinkings + [thinking],
             "solutions": solution,
+            "ori_solution": example["ori_solution"],
             "source": example["source"],
         })
         if i == 0:
@@ -96,7 +97,7 @@ def main(args):
         solutions_per_sample = partial_solutions[start_idx:end_idx] + [sample["solutions"]]
         gt = parse_ground_truth(sample["answer"])
         preds = [extract_pred_and_parse(solution) for solution in solutions_per_sample]
-        scores = [verify(pred, gt) for pred in preds]
+        scores = [verify(gt, pred) for pred in preds]
         
         sample["solutions"] = solutions_per_sample
         sample["preds"] = [str(pred[0]) if pred else "" for pred in preds]
