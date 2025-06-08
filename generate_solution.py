@@ -20,6 +20,7 @@ def main(args):
     out_file = f"{output_dir}/{out_file_prefix}_tokensPerStep{args.num_tokens_per_step}.json"
 
     # Load and prepare data
+    data_type = args.data_path.split("/")[-1][:-len(".json")]
     with open(args.data_path, "r") as f:
         examples = json.load(f)
 
@@ -36,7 +37,7 @@ def main(args):
     prompt_partial_thinkings = []
     for i, example in enumerate(examples):
         question = example["question"].strip()
-        prompt = prepare_prompt(question, tokenizer)
+        prompt = prepare_prompt(question, tokenizer, data_type=data_type)
         thinking = example["thinking"]
         solution = example["solution"]
 
@@ -96,7 +97,7 @@ def main(args):
         end_idx = start_idx + len(sample["thinkings"]) - 1
         solutions_per_sample = partial_solutions[start_idx:end_idx] + [sample["solutions"]]
         gt = parse_ground_truth(sample["answer"])
-        preds = [extract_pred_and_parse(solution) for solution in solutions_per_sample]
+        preds = [extract_pred_and_parse(solution, data_type=data_type) for solution in solutions_per_sample]
         scores = [verify(gt, pred) for pred in preds]
         
         sample["solutions"] = solutions_per_sample

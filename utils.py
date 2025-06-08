@@ -3,7 +3,7 @@ import re
 import random
 import numpy as np
 import torch
-from math_verify import parse, LatexExtractionConfig
+from math_verify import parse
 
 
 def set_seed(seed: int = 42) -> None:
@@ -17,8 +17,12 @@ def set_seed(seed: int = 42) -> None:
     print(f"Random seed set as {seed}")
 
 
-def prepare_prompt(question, tokenizer):
-    user_prompt = "Please reason step by step, and put your final answer within \\boxed{}."
+def prepare_prompt(question, tokenizer, data_type="math"):
+    if data_type == "math":
+        user_prompt = "Please reason step by step, and put your final answer within \\boxed{}."
+    elif data_type == "science":
+        user_prompt = "Please reason step by step, and put your final answer within \\boxed{}. Your answer should be one of the options 'ABCD'."
+
     message = [
         {"role": "user", "content":"Question: " + question + "\n\n" + user_prompt},
     ]
@@ -29,6 +33,58 @@ def prepare_prompt(question, tokenizer):
     )
     assert "<think>" not in prompt
     return prompt
+
+
+def extract_last_boxed(text):
+    """
+    Extract only the last \boxed{content} pattern in the text.
+    Ignores empty boxes.
+    
+    Args:
+        text (str): Input string containing \boxed{} patterns
+        
+    Returns:
+        str: The last \boxed{} pattern, or empty string if none found
+    """
+    def find_boxed_patterns(text):
+        """Find all \boxed{...} patterns, handling nested braces."""
+        matches = []
+        i = 0
+        while i < len(text):
+            # Look for \boxed{
+            if text[i:i+7] == r'\boxed{':
+                start_pos = i
+                i += 7  # Move past \boxed{
+                
+                # Count braces to handle nesting
+                brace_count = 1
+                content_start = i
+                
+                while i < len(text) and brace_count > 0:
+                    if text[i] == '{':
+                        brace_count += 1
+                    elif text[i] == '}':
+                        brace_count -= 1
+                    i += 1
+                
+                if brace_count == 0:  # Found matching closing brace
+                    content = text[content_start:i-1]  # Exclude the final }
+                    # Only add non-empty content
+                    if content.strip():  # Ignore empty or whitespace-only content
+                        matches.append((content, start_pos))
+            else:
+                i += 1
+        
+        return matches
+    
+    matches = find_boxed_patterns(text)
+    
+    if not matches:
+        return ""
+    
+    # Return only the last match (highest position)
+    last_content, _ = max(matches, key=lambda x: x[1])
+    return f"\\boxed{{{last_content}}}"
 
 
 def extract_last_unique_boxed(text):
@@ -93,8 +149,11 @@ def extract_last_unique_boxed(text):
     
     return " and ".join(result_parts) if len(result_parts) > 1 else result_parts[0] if result_parts else ""
 
-def extract_pred_and_parse(solution):
-    pred = parse(extract_last_unique_boxed(solution))
+def extract_pred_and_parse(solution, data_type="math"):
+    if data_type == "math":
+        pred = parse(extract_last_unique_boxed(solution))
+    elif data_type == "science":
+        pred = parse(extract_last_boxed(solution))
     # if "boxed" in solution:
     #     pred = parse(
     #         solution, 
