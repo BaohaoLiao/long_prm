@@ -21,7 +21,7 @@ def prepare_prompt(question, tokenizer, data_type="math"):
     if data_type == "math":
         user_prompt = "Please reason step by step, and put your final answer within \\boxed{}."
     elif data_type == "science":
-        user_prompt = "Please reason step by step, and put your final answer within \\boxed{}. Your answer should be one of the options 'ABCD'."
+        user_prompt = "Please reason step by step, and put your final answer within \\boxed{}. Your answer format should be \\boxed{LETTER}, where LETTER is one of 'ABCD'."
 
     message = [
         {"role": "user", "content":"Question: " + question + "\n\n" + user_prompt},
