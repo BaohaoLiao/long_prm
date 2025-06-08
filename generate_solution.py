@@ -97,12 +97,21 @@ def main(args):
         end_idx = start_idx + len(sample["thinkings"]) - 1
         solutions_per_sample = partial_solutions[start_idx:end_idx] + [sample["solutions"]]
         gt = parse_ground_truth(sample["answer"])
-        preds = [extract_pred_and_parse(solution, data_type=data_type) for solution in solutions_per_sample]
-        scores = [verify(gt, pred) for pred in preds]
+        if data_type == "science":
+            preds = [extract_pred_and_parse(solution, data_type=data_type) for solution in solutions_per_sample[:-1]]
+            scores = [verify(gt, pred) for pred in preds]
         
-        sample["solutions"] = solutions_per_sample
-        sample["preds"] = [str(pred[0]) if pred else "" for pred in preds]
-        sample["scores"] = scores
+            sample["solutions"] = solutions_per_sample
+            sample["preds"] = [str(pred[0]) if pred else "" for pred in preds] + [sample["answer"]]
+            sample["scores"] = scores + [True]
+
+        else:
+            preds = [extract_pred_and_parse(solution, data_type=data_type) for solution in solutions_per_sample]
+            scores = [verify(gt, pred) for pred in preds]
+        
+            sample["solutions"] = solutions_per_sample
+            sample["preds"] = [str(pred[0]) if pred else "" for pred in preds]
+            sample["scores"] = scores
 
         start_idx = end_idx
 
