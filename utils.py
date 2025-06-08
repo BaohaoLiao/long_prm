@@ -3,7 +3,7 @@ import re
 import random
 import numpy as np
 import torch
-from math_verify import parse
+from math_verify import parse, StringExtractionConfig
 
 
 def set_seed(seed: int = 42) -> None:
@@ -19,12 +19,19 @@ def set_seed(seed: int = 42) -> None:
 
 def prepare_prompt(question, tokenizer, data_type="math"):
     if data_type == "math":
-        user_prompt = "Please reason step by step, and put your final answer within \\boxed{}."
+        prefix = ""
+        suffix = "\n\nPlease reason step by step, and put your final answer within \\boxed{}."
     elif data_type == "science":
-        user_prompt = "Please reason step by step, and put your final answer within \\boxed{}. Your answer format should be \\boxed{LETTER}, where LETTER is one of 'ABCD'."
+        prefix = (
+            "Answer the following multiple choice question. "
+            "The last line of your response should be of the following format: "
+            "'ANSWER: $LETTER' (without quotes) where LETTER is one of ABCD. "
+            "Think step by step before answering.\n\n"
+        )
+        suffix = ""
 
     message = [
-        {"role": "user", "content":"Question: " + question + "\n\n" + user_prompt},
+        {"role": "user", "content": prefix + "Question: " + question + suffix},
     ]
     prompt = tokenizer.apply_chat_template(
         message,
@@ -153,7 +160,10 @@ def extract_pred_and_parse(solution, data_type="math"):
     if data_type == "math":
         pred = parse(extract_last_unique_boxed(solution))
     elif data_type == "science":
-        pred = parse(extract_last_boxed(solution))
+        pred = parse(
+            solution,
+            extraction_config=[StringExtractionConfig(lowercase=False)],
+        )
     # if "boxed" in solution:
     #     pred = parse(
     #         solution, 
