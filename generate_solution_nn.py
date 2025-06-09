@@ -42,8 +42,8 @@ def main(args):
         solution = example["solution"]
 
         partial_thinkings = []
-        for i in range(len(thinkings)-1):
-            partial_thinking = "<think>" + "".join(thinkings[:i+1]) + "</think>"
+        for t in range(len(thinkings)-1):
+            partial_thinking = "<think>" + "".join(thinkings[:t+1]) + "</think>"
             partial_thinkings.append(partial_thinking)
             prompt_partial_thinkings.append(prompt + partial_thinking)
         
